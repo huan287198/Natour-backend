@@ -27,12 +27,12 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
-    difficulty: {
+    category: {
       type: String,
-      required: [true, 'A tour must have a difficulty'],
+      required: [true, 'A tour must have a category'],
       enum: {
-        values: ['easy', 'medium', 'difficult'],
-        message: 'Difficulty is either: easy, medium, difficult'
+        values: ['inside', 'outside'],
+        message: 'Difficulty is either: inside, outside'
       }
     },
     ratingsAverage: {
@@ -71,7 +71,8 @@ const tourSchema = new mongoose.Schema(
     },
     imageCover: {
       type: String,
-      required: [true, 'A tour must have a cover image']
+      // required: [true, 'A tour must have a cover image']
+      default: 'tour-1-cover.jpg'
     },
     images: [String],
     createdAt: {
@@ -85,27 +86,13 @@ const tourSchema = new mongoose.Schema(
       default: false
     },
     startLocation: {
-      // GeoJSON
-      type: {
-        type: String,
-        default: 'Point',
-        enum: ['Point']
-      },
-      coordinates: [Number],
-      address: String,
-      description: String
+      type: mongoose.Schema.ObjectId,
+      ref: 'Location'
     },
     locations: [
       {
-        type: {
-          type: String,
-          default: 'Point',
-          enum: ['Point']
-        },
-        coordinates: [Number],
-        address: String,
-        description: String,
-        day: Number
+        type: mongoose.Schema.ObjectId,
+        ref: 'Location'
       }
     ],
     guides: [
@@ -161,18 +148,23 @@ tourSchema.pre('save', function(next) {
 
 // QUERY MIDDLEWARE
 // tourSchema.pre('find', function(next) {
-tourSchema.pre(/^find/, function(next) {
-  this.find({ secretTour: { $ne: true } });
+// tourSchema.pre(/^find/, function(next) {
+//   this.find({ secretTour: { $ne: true } });
 
-  this.start = Date.now();
-  next();
-});
+//   this.start = Date.now();
+//   next();
+// });
 
 tourSchema.pre(/^find/, function(next) {
   this.populate({
     path: 'guides',
     select: '-__v -passwordChangedAt'
-  });
+  })
+    .populate({
+      path: 'startLocation',
+      select: '-day'
+    })
+    .populate('locattions');
 
   next();
 });

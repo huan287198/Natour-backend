@@ -18,6 +18,10 @@ router
 
 router.route('/tour-stats').get(tourController.getTourStats);
 router
+  .route('/tour-booked/:tourId')
+  .get(authController.protect, tourController.getTourBooked);
+
+router
   .route('/monthly-plan/:year')
   .get(
     authController.protect,
@@ -32,15 +36,27 @@ router
 // /tours-within/233/center/-40,45/unit/mi
 
 router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
-
+router.route('/client').get(tourController.getAllTours3);
 router
   .route('/')
-  .get(tourController.getAllTours)
+  .get(tourController.getAllTours2)
   .post(
     authController.protect,
     authController.restrictTo('admin', 'lead-guide'),
+    tourController.uploadTourImages,
+    tourController.resizeTourImages,
     tourController.createTour
   );
+
+// router
+//   .route('/new')
+//   .post(
+//     authController.protect,
+//     authController.restrictTo('admin', 'lead-guide'),
+//     tourController.uploadImageCover,
+//     tourController.resizeImageCover,
+//     tourController.createTour
+//   );
 
 router
   .route('/:id')

@@ -4,6 +4,9 @@ const authController = require('./../controllers/authController');
 
 const router = express.Router();
 
+router.route('/count-books/:id').get(userController.getCountBooks);
+router.route('/count-reviews/:id').get(userController.getCountReviews);
+
 router.post('/signup', authController.signup);
 router.post('/login', authController.login);
 router.get('/logout', authController.logout);
@@ -16,11 +19,15 @@ router.use(authController.protect);
 
 router.patch('/updateMyPassword', authController.updatePassword);
 router.get('/me', userController.getMe, userController.getUser);
+router.get('/my-tours', userController.getMe, userController.getMyTours);
+router.get('/my-reviews', userController.getMe, userController.getMyReviews);
+router.get('/guides', userController.getGuides);
+
 router.patch(
   '/updateMe',
   userController.uploadUserPhoto,
   userController.resizeUserPhoto,
-  userController.updateMe
+  authController.updateMe
 );
 router.delete('/deleteMe', userController.deleteMe);
 

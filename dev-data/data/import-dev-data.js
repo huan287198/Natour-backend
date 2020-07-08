@@ -14,21 +14,27 @@ dotenv.config({ path: './config.env' });
 // );
 
 mongoose
-  .connect('mongodb+srv://admin:287198Huan@natours-v6mud.mongodb.net/test?retryWrites=true&w=majority', {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false
-  })
+  .connect(
+    'mongodb+srv://admin:287198Huan@natours-v6mud.mongodb.net/test?retryWrites=true&w=majority',
+    {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+      useFindAndModify: false,
+      useUnifiedTopology: true
+    }
+  )
+  // eslint-disable-next-line no-console
   .then(() => console.log('DB connection successful!'));
 
 // READ JSON FILE
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
 const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf-8'));
-const bookings = JSON.parse(fs.readFileSync(`${__dirname}/bookings.json`, 'utf-8'));
+const bookings = JSON.parse(
+  fs.readFileSync(`${__dirname}/bookings.json`, 'utf-8')
+);
 const reviews = JSON.parse(
   fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
 );
-
 
 // IMPORT DATA INTO DB
 const importData = async () => {
@@ -38,8 +44,10 @@ const importData = async () => {
     await Review.create(reviews);
     await Booking.create(bookings);
 
+    // eslint-disable-next-line no-console
     console.log('Data successfully loaded!');
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.log(err);
   }
   process.exit();
@@ -52,8 +60,10 @@ const deleteData = async () => {
     await User.deleteMany();
     await Review.deleteMany();
     await Booking.deleteMany();
+    // eslint-disable-next-line no-console
     console.log('Data successfully deleted!');
   } catch (err) {
+    // eslint-disable-next-line no-console
     console.log(err);
   }
   process.exit();

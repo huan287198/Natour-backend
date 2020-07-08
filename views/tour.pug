@@ -75,6 +75,25 @@ block content
       each review in tour.reviews
         +reviewCard(review)
 
+  if booking  
+    form.form.form--review
+      .form__group
+        label.form__label(for='review') Review
+        input#review.form__input(type='text', placeholder='your review', required)
+      .form__group.ma-bt-md
+        label.form__label(for='rating') Rating
+        input#rating.form__input(type='number', placeholder='5', required, min=0, max=5)
+      .form__group
+        input#tour.form__input(type='hidden', value=`${tour._id}`, required)
+      .form__group
+        button.btn.btn--green Review
+    br
+    br
+    br
+    br
+    br
+    br
+
   section.section-cta
     .cta
       .cta__img.cta__img--logo
@@ -87,6 +106,8 @@ block content
         
         if tour.participant >= tour.maxGroupSize
           a.btn.btn--green.span-all-rows(href='#') Max size
+        else if booking
+          a.btn.btn--green.span-all-rows(href='#') Booked!
         else if user
           button.btn.btn--green.span-all-rows#book-tour(data-tour-id=`${tour.id}`) Book tour now!
         else

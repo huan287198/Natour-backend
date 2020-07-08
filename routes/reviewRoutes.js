@@ -8,7 +8,7 @@ router.use(authController.protect);
 
 router
   .route('/')
-  .get(reviewController.getAllReviews)
+  .get(reviewController.getAllReviews2)
   .post(
     authController.restrictTo('user'),
     reviewController.setTourUserIds,
@@ -25,7 +25,7 @@ router
   )
   .delete(
     authController.restrictTo('user', 'admin'),
-    reviewController.deleteReview
+    reviewController.deleteReview2
   );
 
 module.exports = router;

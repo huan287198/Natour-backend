@@ -1,6 +1,7 @@
 /* eslint-disable */
 import '@babel/polyfill';
 import { displayMap } from './mapbox';
+import { review } from './review';
 import { login, logout, signup } from './login';
 import { updateSettings } from './updateSettings';
 import { bookTour } from './stripe';
@@ -10,6 +11,7 @@ import { showAlert } from './alerts';
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
 const signupForm = document.querySelector('.form--signup');
+const reviewForm = document.querySelector('.form--review');
 const logOutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
@@ -29,7 +31,7 @@ if (loginForm)
     login(email, password);
   });
 
-  if (signupForm)
+if (signupForm)
   signupForm.addEventListener('submit', e => {
     e.preventDefault();
     const name = document.getElementById('name').value;
@@ -38,6 +40,16 @@ if (loginForm)
     const passwordConfirm = document.getElementById('password-confirm').value;
     signup(name, email, password, passwordConfirm);
   });
+
+if (reviewForm)
+  reviewForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const des = document.getElementById('review').value;
+    const rating = document.getElementById('rating').value;
+    const tourID = document.getElementById('tour').value;
+    review(des, rating, tourID);
+  }
+);
 
 if (logOutBtn) logOutBtn.addEventListener('click', logout);
 
@@ -56,7 +68,6 @@ if (userPasswordForm)
   userPasswordForm.addEventListener('submit', async e => {
     e.preventDefault();
     document.querySelector('.btn--save-password').textContent = 'Updating...';
-
     const passwordCurrent = document.getElementById('password-current').value;
     const password = document.getElementById('password').value;
     const passwordConfirm = document.getElementById('password-confirm').value;

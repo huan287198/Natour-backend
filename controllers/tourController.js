@@ -1,6 +1,7 @@
 const multer = require('multer');
 const sharp = require('sharp');
 const Tour = require('./../models/tourModel');
+const Booking = require('./../models/bookingModel');
 const catchAsync = require('./../utils/catchAsync');
 const factory = require('./handlerFactory');
 const AppError = require('./../utils/appError');
@@ -18,6 +19,22 @@ const multerFilter = (req, file, cb) => {
 const upload = multer({
   storage: multerStorage,
   fileFilter: multerFilter
+});
+
+exports.uploadImageCover = upload.single('imageCover');
+
+exports.resizeImageCover = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
+
+  req.file.filename = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+
+  await sharp(req.file.buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${req.file.filename}`);
+
+  next();
 });
 
 exports.uploadTourImages = upload.fields([
@@ -62,15 +79,102 @@ exports.resizeTourImages = catchAsync(async (req, res, next) => {
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
-  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  
+  // req.query.fields = 'name,price,ratingsAverage,summary,difficulty,imageCover';
   next();
 };
 
 exports.getAllTours = factory.getAll(Tour);
+exports.getAllTours2 = catchAsync(async (req, res, next) => {
+  const duration = req.query.duration ? { duration: req.query.duration } : {};
+  const difficulty = req.query.difficulty
+    ? { difficulty: req.query.difficulty }
+    : {};
+  const search = req.query.search
+    ? {
+        name: {
+          $regex: req.query.search,
+          $options: 'i'
+        }
+      }
+    : {};
+  // eslint-disable-next-line no-nested-ternary
+  const sort = req.query.sort
+    ? req.query.sort === 'lowest'
+      ? { price: 1 }
+      : { price: -1 }
+    : { _id: -1 };
+  const doc = await Tour.find({ ...difficulty, ...search, ...duration }).sort(
+    sort
+  );
+
+  res.status(200).json({
+    status: 'success',
+    results: doc.length,
+    data: {
+      data: doc
+    }
+  });
+});
+exports.getAllTours3 = catchAsync(async (req, res, next) => {
+  const duration = req.query.duration ? { duration: req.query.duration } : {};
+  const difficulty = req.query.difficulty
+    ? { difficulty: req.query.difficulty }
+    : {};
+  const search = req.query.search
+    ? {
+        name: {
+          $regex: req.query.search,
+          $options: 'i'
+        }
+      }
+    : {};
+  // eslint-disable-next-line no-nested-ternary
+  const sort = req.query.sort
+    ? req.query.sort === 'lowest'
+      ? { price: 1 }
+      : { price: -1 }
+    : { _id: -1 };
+  const doc = await Tour.find({
+    ...difficulty,
+    ...search,
+    ...duration,
+    secretTour: false
+  }).sort(sort);
+
+  res.status(200).json({
+    status: 'success',
+    results: doc.length,
+    data: {
+      data: doc
+    }
+  });
+});
 exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 exports.createTour = factory.createOne(Tour);
 exports.updateTour = factory.updateOne(Tour);
 exports.deleteTour = factory.deleteOne(Tour);
+
+exports.getTourBooked = catchAsync(async (req, res, next) => {
+  // 1) Get the data, for the requested tour (including reviews and guides)
+  const tour = await Tour.findById(req.params.tourId).populate({
+    path: 'reviews',
+    fields: 'review rating user'
+  });
+
+  if (!tour) {
+    return next(new AppError('There is no tour with that name.', 404));
+  }
+  //kiem tra xem da book chua
+  const booking = await Booking.find({ user: req.user.id, tour });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      booking
+    }
+  });
+});
 
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
